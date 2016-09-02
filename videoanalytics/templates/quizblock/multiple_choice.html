@@ -1,0 +1,17 @@
+{% load markup %}
+{% load getresponse %}
+
+<ol>
+    {% for answer in question.answer_set.all %}
+        <li>
+            <input name="pageblock-{{block.pageblock.id}}-question{{question.id}}"
+                value="{{answer.value}}" type="checkbox"
+                {% if response %}
+                    {% if not block.allow_redo %}disabled="disabled"{% endif %}
+                    {% ifanswerin response answer %}checked="checked"{% else %}{% endifanswerin %}
+                {% endif %}>
+                <label>{{answer.label}}</label>
+            </input>
+        </li>
+    {% endfor %}
+</ol>

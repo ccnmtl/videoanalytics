@@ -1,0 +1,21 @@
+{% load quizsummary %}
+{% load i18n %}
+{% with cls="assessment" %}
+
+    {% get_quiz_summary user cls as results %}
+
+    <h3>Recommended Videos</h3>
+    {% for r in results %}
+        {% if not r.user_correct %}
+            {{r.question.explanation|safe}}
+        {% endif %}
+    {% endfor %}
+
+    <h3>Other Videos</h3>
+    {% for r in results %}
+        {% if r.user_correct %}
+            {{r.question.explanation|safe}}
+        {% endif %}
+    {% endfor %}
+
+{% endwith %}
