@@ -8,7 +8,6 @@ from django.contrib.auth.views import password_change, password_change_done, \
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from pagetree.generic.views import PageView
-from rest_framework import routers
 
 from videoanalytics.main.views import IndexView, LoginView, \
     LogoutView, ReportView, RestrictedEditView, RestrictedPageView, \

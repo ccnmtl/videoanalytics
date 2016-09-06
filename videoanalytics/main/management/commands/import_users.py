@@ -12,6 +12,21 @@ class Command(BaseCommand):
                     help='CSV file containing user, password and group'),
     )
 
+    def process_row(self, row):
+        username = row[0]
+        password = row[1]
+        group = row[2]
+        print '{}/{} in {}'.format(username, password, group)
+
+        try:
+            user = User.objects.get(username=username)
+            print 'User {} already exists'.format(username)
+        except User.DoesNotExist:
+            user = User.objects.create_user(username, '', password)
+
+        user.profile.research_group = group
+        user.profile.save()
+
     def handle(self, *app_labels, **options):
         args = 'Usage: ./manage.py import_users --csv csv file'
 
@@ -19,16 +34,15 @@ class Command(BaseCommand):
             print args
             return
 
-        fh = open(options.get('csv'), 'r')
+        try:
+            fh = open(options.get('csv'), 'r')
+
+        except IOError:
+            print 'error opening {}'.format(options.get('csv'))
+            return
+
         table = csv.reader(fh)
 
         rows = list(table)
         for row in rows:
-            username = row[0]
-            password = row[1]
-            group = row[2]
-
-            user = User.objects.get_or_create(
-                username=username, password=password)
-            user.profile.research_group = group
-            user.profile.save()
+            self.process_row(row)

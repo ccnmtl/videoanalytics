@@ -4,17 +4,28 @@
 
     {% get_quiz_summary user cls as results %}
 
-    <h3>Recommended Videos</h3>
-    {% for r in results %}
-        {% if not r.user_correct %}
-            {{r.question.explanation|safe}}
+    {% for question in results.incorrect %}
+        {% if forloop.first %}
+            <h3>Recommended Videos</h3>
+            <p>When the student receives an incorrect answer, the associated video is pushed up to the top.</p>
+            <ul>
+        {% endif %}
+
+        <li>{{question.explanation|safe}}</li>
+        {% if forloop.last %}
+            </ul>
         {% endif %}
     {% endfor %}
 
-    <h3>Other Videos</h3>
-    {% for r in results %}
-        {% if r.user_correct %}
-            {{r.question.explanation|safe}}
+    {% for question in results.correct %}
+        {% if forloop.first %}
+            <h3>Related Videos</h3>
+            <p>All other videos are shown in this list.</p>
+            <ul>
+        {% endif %}
+        <li>{{question.explanation|safe}}</li>
+        {% if forloop.last %}
+            </ul>
         {% endif %}
     {% endfor %}
 

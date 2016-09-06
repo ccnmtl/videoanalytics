@@ -8,12 +8,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import logout as auth_logout_view
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.views.generic.base import TemplateView, View
 from djangowind.views import logout as wind_logout_view
 from pagetree.generic.views import EditView, PageView
-from pagetree.helpers import get_section_from_path
 from pagetree.models import Hierarchy
 from pagetree.models import PageBlock
 from quizblock.models import Quiz
@@ -75,7 +73,7 @@ class RestrictedPageView(PageView):
 
         if (not user.is_superuser and
                 section.hierarchy.name != user.profile.research_group):
-            raise PermissionDenied()
+            return HttpResponseRedirect(user.profile.last_location_url())
 
         return super(RestrictedPageView, self).perform_checks(request, path)
 

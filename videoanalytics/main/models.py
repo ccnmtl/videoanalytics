@@ -1,9 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
-from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models.fields import CharField
 from django.db.models.fields.related import OneToOneField
 from django.db.models.signals import post_save
 from pagetree.models import Hierarchy, UserPageVisit, PageBlock
@@ -259,8 +257,7 @@ ReportableInterface.register(YouTubeBlock)
 class VideoAnalyticsReport(PagetreeReport):
 
     def users(self):
-        users = User.objects.filter(
-            is_active=False)
+        users = User.objects.exclude(is_superuser=True, is_staff=True)
         return users.order_by('id')
 
     def standalone_columns(self):
@@ -268,6 +265,9 @@ class VideoAnalyticsReport(PagetreeReport):
             StandaloneReportColumn(
                 'participant_id', 'profile', 'string',
                 'Participant Id', lambda x: x.username),
+            StandaloneReportColumn(
+                'research_group', 'profile', 'string',
+                'Research Group', lambda x: x.profile.research_group),
             StandaloneReportColumn(
                 'percent_complete', 'profile', 'percent',
                 '% of hierarchy completed',
