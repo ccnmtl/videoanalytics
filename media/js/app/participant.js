@@ -1,15 +1,18 @@
+/* global Backbone: true, _: true, alert: true */
+
 (function() {
     window.ParticipantPageView = Backbone.View.extend({
         events: {
             'click a[disabled="disabled"]': 'onClickDisabled',
-            'click .nav li[disabled="disabled"] a': 'onClickDisabled'
+            'click .nav li[disabled="disabled"] a': 'onClickDisabled',
+            'click input[name="submit-page"]': 'onSubmitPage'
         },
         initialize: function(options) {
             _.bindAll(this,
                       'onPlayerReady',
                       'onPlayerStateChange',
                       'onYouTubeIframeAPIReady',
-                      'isWatching',
+                      'isWatching', 'onSubmitPage', 'isFormComplete',
                       'recordSecondsViewed');
 
             var self = this;
@@ -24,6 +27,29 @@
             tag.src = 'https://www.youtube.com/iframe_api';
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        },
+        isFormComplete: function(form) {
+            var complete = true;
+            var children = jQuery(form).find('input,textarea,select');
+            jQuery.each(children, function() {
+                if (complete) {
+                    if (this.type === 'radio' || this.type === 'checkbox') {
+                        // one in the group needs to be checked
+                        var selector = 'input[name=' +
+                            jQuery(this).attr('name') + ']';
+                        complete = jQuery(selector).is(':checked');
+                    }
+                }
+            });
+            return complete;
+        },
+        onSubmitPage: function(evt) {
+            var form = jQuery('form[name="page"]')[0];
+            if (!this.isFormComplete(form)) {
+                alert('Please answer all questions before continuing');
+                return false;
+            }
+            return true;
         },
         onClickDisabled: function(evt) {
             evt.preventDefault();

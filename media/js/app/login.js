@@ -1,3 +1,5 @@
+/* global Backbone: true, _: true */
+
 (function() {
     window.LocalLoginView = Backbone.View.extend({
         events: {

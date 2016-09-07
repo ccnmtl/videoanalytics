@@ -1,13 +1,13 @@
-{% load markup %}
-{% load getresponse %}
+{% load markup quizsummary %}
+
+{% ifquizcomplete block %}
+    <div class="alert alert-success" role="alert">
+      <strong>Excellent!</strong> The assessment is complete. Click Next to see your recommendations.
+    </div>
+{% endifquizcomplete %}
+
 {{ block.description|markdown }}
 
-{% if request.user.is_anonymous %}
-    <p class="warning">You must be logged in to view this content</p>
-{% else %}
-
-    {% for question in block.question_set.all %}
-      {% include 'quizblock/question.html' %}
-    {% endfor %}
-
-{% endif %}
+{% for question in block.question_set.all %}
+    {% include 'quizblock/question.html' %}
+{% endfor %}

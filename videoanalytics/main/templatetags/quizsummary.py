@@ -1,7 +1,7 @@
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from pagetree.models import PageBlock
-from quizblock.models import Response, Submission, Quiz
+from quizblock.models import Quiz
 
 
 register = template.Library()
@@ -32,13 +32,13 @@ class GetQuizSummary(template.Node):
 
         blocks = get_quizzes_by_css_class(u.profile.default_hierarchy(), cls)
 
-        results = []
+        results = {'correct': [], 'incorrect': []}
         for b in blocks:
             for question in b.content_object.question_set.all():
-                results.append({
-                    'question': question,
-                    'user_correct': question.is_user_correct(u)
-                })
+                if question.is_user_correct(u):
+                    results['correct'].append(question)
+                else:
+                    results['incorrect'].append(question)
 
         context[self.var_name] = results
         return ''
@@ -50,3 +50,51 @@ def quizsummary(parser, token):
     quiz_class = token.split_contents()[1:][1]
     var_name = token.split_contents()[1:][3]
     return GetQuizSummary(user, quiz_class, var_name)
+
+
+def is_question_complete(question, user):
+    answers = question.correct_answer_values()
+    if len(answers) == 0:
+        # No "correct" values for this question
+        return True
+
+    responses = question.user_responses(user)
+    return len(responses) > 0
+
+
+def is_quiz_complete(quiz, user):
+    complete = True
+    for question in quiz.question_set.all():
+        complete = complete and is_question_complete(question, user)
+    return complete
+
+
+class IfQuizCompleteNode(template.Node):
+    def __init__(self, quiz, nodelist_true, nodelist_false=None):
+        self.nodelist_true = nodelist_true
+        self.nodelist_false = nodelist_false
+        self.quiz = quiz
+
+    def render(self, context):
+        quiz = context[self.quiz]
+        user = context['request'].user
+
+        if is_quiz_complete(quiz, user):
+            return self.nodelist_true.render(context)
+        elif self.nodelist_false is not None:
+            return self.nodelist_false.render(context)
+        else:
+            return ''
+
+
+@register.tag('ifquizcomplete')
+def IfQuizComplete(parser, token):
+    quiz = token.split_contents()[1:][0]
+    nodelist_true = parser.parse(('else', 'endifquizcomplete'))
+    token = parser.next_token()
+    if token.contents == 'else':
+        nodelist_false = parser.parse(('endifquizcomplete',))
+        parser.delete_first_token()
+    else:
+        nodelist_false = None
+    return IfQuizCompleteNode(quiz, nodelist_true, nodelist_false)

@@ -1,17 +1,38 @@
-{% load markup %}
-{% load getresponse %}
+{% load getresponse quizsummary %}
 
 <ol>
     {% for answer in question.answer_set.all %}
         <li>
-            <input name="pageblock-{{block.pageblock.id}}-question{{question.id}}"
-                value="{{answer.value}}" type="checkbox"
-                {% if response %}
-                    {% if not block.allow_redo %}disabled="disabled"{% endif %}
-                    {% ifanswerin response answer %}checked="checked"{% else %}{% endifanswerin %}
-                {% endif %}>
-                <label>{{answer.label}}</label>
-            </input>
+            {% if response %}
+                <input name="pageblock-{{block.pageblock.id}}-question{{question.id}}"
+                    value="{{answer.value}}" type="checkbox"
+                        {% if not block.allow_redo %}disabled="disabled"{% endif %}
+                        {% ifanswerin response answer %}checked="checked"{% else %}{% endifanswerin %}>
+                    <label>{{answer.label}}</label>
+                </input>
+
+                {% if answer.correct %}
+                    <span class="answer-correct">Correct</span>
+                {% else %}
+                    <span class="answer-incorrect">Incorrect</span>
+                {% endif %}
+            {% else %}
+                <input name="pageblock-{{block.pageblock.id}}-question{{question.id}}"
+                    value="{{answer.value}}" type="checkbox">
+                    <label>{{answer.label}}</label>
+                </input>
+            {% endif %}
         </li>
     {% endfor %}
 </ol>
+
+{% if response %}
+<div class="casequestionresult">
+{% is_user_correct request.user question as is_correct %}
+{% if is_correct %}
+    <div>Your answer is correct</div>
+{% else %}
+    <div>Your answer is incorrect</div>
+{% endif %}
+</div>
+{% endif %}

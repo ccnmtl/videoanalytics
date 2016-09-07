@@ -34,10 +34,19 @@
     <div class="row">
         <div class="col-md-12">
             <div id="content">
+                {% if 'videos' in section.hierarchy.name %}
+                    <br />
+                    <ul class="pager">
+                    <li class="previous">
+                        <a href="#" onclick="window.history.back()">&larr; Previous</a>
+                      </li>
+                    </ul>
+                {% endif %}
+
                 {% if needs_submit %}
                 {% if is_submitted %}
                 {% else %}
-                <form action="." method="post">{% csrf_token %}
+                <form name="page" action="." method="post">{% csrf_token %}
                 {% endif %}
                 {% endif %}
 
@@ -67,31 +76,34 @@
                 </form>
                 {% endif %}
                 {% else %}
-                <input type="submit" value="Submit" class="btn btn-primary" />
+                <input name="submit-page" type="submit" value="Submit" class="btn btn-primary" />
 
                 </form>
                 {% endif %}
                 {% endif %}
                 {% endif %}
 
-                {% with previous=section.get_previous next_section=section.get_next %}
-                <ul class="pager">
-                {% if previous %}
-                  <li class="previous">
-                        <a href="{{previous.get_absolute_url}}">&larr; {{previous.label}}</a>
-                  </li>
-                {% endif %}
+                {% if 'videos' not in section.hierarchy.name %}
 
-                {% if next_section and not next_section.is_root %}
-                    <li class="next">
-                        <a {% ifaccessible next_section %}{% else %}disabled="disabled"{% endifaccessible %}
-                            href="{{next_section.get_absolute_url}}">
-                            {{next_section.label}} &rarr;
-                        </a>
-                    </li>
+                    {% with previous=section.get_previous next_section=section.get_next %}
+                    <ul class="pager">
+                    {% if previous %}
+                      <li class="previous">
+                            <a href="{{previous.get_absolute_url}}">&larr; Previous</a>
+                      </li>
+                    {% endif %}
+
+                    {% if next_section and not next_section.is_root %}
+                        <li class="next">
+                            <a {% ifaccessible next_section %}{% else %}disabled="disabled"{% endifaccessible %}
+                                href="{{next_section.get_absolute_url}}">
+                                Next &rarr;
+                            </a>
+                        </li>
+                    {% endif %}
+                    </ul>
+                    {% endwith %}
                 {% endif %}
-                </ul>
-                {% endwith %}
             </div>
         </div>
     </div>

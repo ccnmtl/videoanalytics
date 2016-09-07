@@ -1,11 +1,10 @@
 from django.test import TestCase
 from pagetree.models import Hierarchy, UserPageVisit, Section
+from pagetree.tests.factories import UserFactory, ModuleFactory
 from quizblock.tests.test_models import FakeReq
-
 from videoanalytics.main.models import UserVideoView, \
     QuizSummaryBlock, YouTubeBlock
-from videoanalytics.main.tests.factories import UserFactory, \
-    ModuleFactory, QuizSummaryBlockFactory, \
+from videoanalytics.main.tests.factories import QuizSummaryBlockFactory, \
     YouTubeBlockFactory
 
 
@@ -14,39 +13,38 @@ class UserProfileTest(TestCase):
     def setUp(self):
         self.user = UserFactory()
 
-        ModuleFactory("en", "/pages/en/")
-        ModuleFactory("es", "/pages/es/")
+        ModuleFactory("a", "/pages/a/")
+        ModuleFactory("b", "/pages/b/")
 
-        self.hierarchy_en = Hierarchy.objects.get(name='en')
-        self.hierarchy_es = Hierarchy.objects.get(name='es')
+        self.hierarchy_a = Hierarchy.objects.get(name='a')
+        self.hierarchy_b = Hierarchy.objects.get(name='b')
 
     def test_auto_profile_create(self):
         self.assertFalse(self.user.profile.is_participant())
 
     def test_default_location(self):
         self.assertEquals(self.user.profile.default_location(),
-                          self.hierarchy_en.get_root())
+                          self.hierarchy_a.get_root())
 
+        self.user.profile.research_group = 'b'
         self.user.profile.save()
         self.assertEquals(self.user.profile.default_location(),
-                          self.hierarchy_es.get_root())
+                          self.hierarchy_b.get_root())
 
     def test_last_location_no_visits(self):
         # no language
         self.assertEquals(self.user.profile.last_location(),
-                          self.hierarchy_en.get_root())
-
-        self.user.profile.save()
-
+                          self.hierarchy_a.get_root())
         self.assertEquals(self.user.profile.last_location().get_absolute_url(),
-                          "/pages/en//")
+                          "/pages/a//")
 
+        self.user.profile.research_group = 'b'
         self.user.profile.save()
         self.assertEquals(self.user.profile.last_location().get_absolute_url(),
-                          "/pages/es//")
+                          "/pages/b//")
 
     def test_last_location_with_visits(self):
-        sections = self.hierarchy_en.get_root().get_descendants()
+        sections = self.hierarchy_a.get_root().get_descendants()
         UserPageVisit.objects.create(user=self.user,
                                      section=sections[0],
                                      status="complete")
@@ -54,12 +52,12 @@ class UserProfileTest(TestCase):
                                      section=sections[1],
                                      status="complete")
         self.assertEquals(self.user.profile.last_location().get_absolute_url(),
-                          "/pages/en/one/introduction/")
+                          "/pages/a/one/introduction/")
 
     def test_percent_complete(self):
         self.assertEquals(self.user.profile.percent_complete(), 0)
 
-        sections = self.hierarchy_en.get_root().get_descendants()
+        sections = self.hierarchy_a.get_root().get_descendants()
         UserPageVisit.objects.create(user=self.user,
                                      section=sections[0],
                                      status="complete")
@@ -70,19 +68,19 @@ class UserProfileTest(TestCase):
         self.assertEquals(self.user.profile.percent_complete(), 50)
 
     def test_time_spent(self):
-        self.assertEquals(self.user.profile.time_spent('en'), 0)
+        self.assertEquals(self.user.profile.time_spent(), 0)
 
-        sections = self.hierarchy_en.get_root().get_descendants()
+        sections = self.hierarchy_a.get_root().get_descendants()
         UserPageVisit.objects.create(user=self.user,
                                      section=sections[0],
                                      status="complete")
-        self.assertTrue(self.user.profile.time_spent('en') > 0)
+        self.assertTrue(self.user.profile.time_spent() > 0)
 
         UserPageVisit.objects.create(user=self.user,
                                      section=sections[1],
                                      status="complete")
 
-        self.assertTrue(self.user.profile.time_spent('en') > 0)
+        self.assertTrue(self.user.profile.time_spent() > 0)
 
 
 class UserVideoViewTest(TestCase):

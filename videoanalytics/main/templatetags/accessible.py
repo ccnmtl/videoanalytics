@@ -33,4 +33,3 @@ def accessible(parser, token):
     else:
         nodelist_false = None
     return AccessibleNode(module, nodelist_true, nodelist_false)
-
