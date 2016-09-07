@@ -1,0 +1,11 @@
+<div class="youtube-pageblock">
+<h3>{{block.title}}</h3>
+{% if site.domain|slice:":9" == 'localhost' %} 
+    <iframe id="player" frameborder="0" allowfullscreen="1" 
+     src="https://www.youtube.com/embed/{{block.video_id}}?rel=0&amp;showinfo=0&enablejsapi=1&origin={{site.domain}}"></iframe>
+{% else %}
+    <iframe id="player" frameborder="0" allowfullscreen="1" 
+     title="YouTube video player"
+     src="https://www.youtube.com/embed/{{block.video_id}}?rel=0&amp;showinfo=0&enablejsapi=1"></iframe>
+{% endif %}
+</div>

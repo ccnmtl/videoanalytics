@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% load render accessible i18n %}
+
+{% block js %}
+    <script src="{{STATIC_URL}}js/app/participant.js"></script>
+    {% for block in section.pageblock_set.all %}
+        {% renderjs block %}
+    {% endfor %}
+    <script type="text/javascript"> 
+        jQuery(document).ready(function() {
+            var view = new ParticipantPageView({
+                el: jQuery('body')[0],
+                participant_id: {{request.user.id}}
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+    {% for block in section.pageblock_set.all %}
+        {% rendercss block %}
+    {% endfor %}
+{% endblock %}
+
+{% block bodyclass %}module-{{module.slug}}{% endblock %}
+
+{% block bodyid %}section-{{section.id}}{% endblock %}
+
+{% block title %}{{section.label}}{% endblock %}
+
+{% block content %}
+    <div id="overlay" style="display: none"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="content">
+                {% if 'videos' in section.hierarchy.name %}
+                    <br />
+                    <ul class="pager">
+                    <li class="previous">
+                        <a href="#" onclick="window.history.back()">&larr; Previous</a>
+                      </li>
+                    </ul>
+                {% endif %}
+
+                {% if needs_submit %}
+                {% if is_submitted %}
+                {% else %}
+                <form name="page" action="." method="post">{% csrf_token %}
+                {% endif %}
+                {% endif %}
+
+                {% for block in section.pageblock_set.all %}
+                    <div class="pageblock
+                        {% if block.css_extra %}
+                            {{block.css_extra}}
+                        {% endif %}">
+                        {% if block.label %}
+                            <h3>{{block.label}}</h3>
+                         {% endif %}
+                        {% render block %}
+                    </div>
+                {% endfor %}
+
+                {% include "pagetree/toc.html" %}
+
+                {% if needs_submit %}
+                {% if request.user.is_anonymous %}
+                {% else %}
+
+                {% if is_submitted %}
+                {% if allow_redo or request.user.is_superuser %}
+                <form action="." method="post">{% csrf_token %}
+                <input type="hidden" name="action" value="reset" />
+                <input type="submit" value="clear your answers and try again" class="btn" />
+                </form>
+                {% endif %}
+                {% else %}
+                <input name="submit-page" type="submit" value="Submit" class="btn btn-primary" />
+
+                </form>
+                {% endif %}
+                {% endif %}
+                {% endif %}
+
+                {% if 'videos' not in section.hierarchy.name %}
+
+                    {% with previous=section.get_previous next_section=section.get_next %}
+                    <ul class="pager">
+                    {% if previous %}
+                      <li class="previous">
+                            <a href="{{previous.get_absolute_url}}">&larr; Previous</a>
+                      </li>
+                    {% endif %}
+
+                    {% if next_section and not next_section.is_root %}
+                        <li class="next">
+                            <a {% ifaccessible next_section %}{% else %}disabled="disabled"{% endifaccessible %}
+                                href="{{next_section.get_absolute_url}}">
+                                Next &rarr;
+                            </a>
+                        </li>
+                    {% endif %}
+                    </ul>
+                    {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
