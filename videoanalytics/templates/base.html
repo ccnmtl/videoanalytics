@@ -124,6 +124,18 @@
         </div> <!-- /.row -->
     </div> <!-- /.container-pl -->
 
+    {% block footer %}
+        <footer role="contentinfo" class="clearfix">
+            <h1 class="sr-only">This application is produced by:</h1>
+            <ul class="footer-logos pull-right">
+                <li><a href="http://biology.columbia.edu/" target="_blank">
+                    <img src="{{STATIC_URL}}img/biology-logo.jpg" alt="Biological Sciences at Columbia University" /></a></li>
+                <li><a href="http://ctl.columbia.edu" target="_blank">
+                    <img src="{{STATIC_URL}}img/ctl-logo.png" alt="Center for Teaching and Learning at Columbia University" /></a></li>
+            </ul>
+        </footer>
+    {% endblock %}
+
     {% if request.user.is_anonymous %}
     <!-- Login Modal -->
     <div class="modal" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="loginLabel" aria-hidden="true">
@@ -180,9 +192,6 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     {% endif %}<!-- request.user.is_anonymous -->
-
-    {% block footer %}
-    {% endblock %}
 
     <script src="{{STATIC_URL}}js/underscore-min.js"></script>
     <script src="{{STATIC_URL}}js/backbone-min.js"></script>
