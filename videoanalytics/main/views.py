@@ -146,6 +146,6 @@ class ReportView(LoggedInStaffMixin, View):
         for row in report.values(hierarchies):
             writer.writerow(row)
 
-        z.writestr("meaningfulconsent_values.csv", output.getvalue())
+        z.writestr("videoanalytics_values.csv", output.getvalue())
 
         return response

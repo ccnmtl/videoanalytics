@@ -13,12 +13,6 @@
                  for="question{{question.id}}-{{answer.value}}">
                     {{answer.label|safe}}
                 </label>
-
-                {% if answer.correct %}
-                    <span class="answer-correct">Correct</span>
-                {% else %}
-                    <span class="answer-incorrect">Incorrect</span>
-                {% endif %}
             </input>
         {% else %}
             <input id="question{{question.id}}-{{answer.value}}"
@@ -33,14 +27,3 @@
         </li>
   {% endfor %}
 </ol>
-
-{% if response %}
-<div class="casequestionresult">
-{% is_user_correct request.user question as is_correct %}
-{% if is_correct %}
-    <div>Your answer is correct</div>
-{% else %}
-    <div>Your answer is incorrect</div>
-{% endif %}
-</div>
-{% endif %}
