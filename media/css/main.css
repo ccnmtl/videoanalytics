@@ -501,7 +501,9 @@ and (orientation: portrait) {
 
 .casequestion ol {
     display: inline-block;
+    list-style-type: upper-alpha;
 }
+
 
 .pageblock.survey .caseanswercontainer label {
     font-weight: normal;
