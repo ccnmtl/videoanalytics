@@ -4,6 +4,9 @@ html, body {
 
 body {
     width: 100%;
+}
+
+body.splash {
     background-image: url(../img/bg_cmpd.png);
     background-repeat: repeat;
     background-position: top;
@@ -499,11 +502,15 @@ and (orientation: portrait) {
     display: none;
 }
 
-.casequestion ol {
+ol.caseanswercontainer {
     display: inline-block;
-    list-style-type: upper-alpha;
+    list-style-type: lower-alpha;
+    margin-top: 10px;
 }
 
+ol.caseanswercontainer li label {
+    font-weight: normal;
+}
 
 .pageblock.survey .caseanswercontainer label {
     font-weight: normal;
