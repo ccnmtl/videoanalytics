@@ -7,7 +7,7 @@
     <div class="casecontent">
         <div class="casequestion panel panel-default">
             <div class="casequestiontext panel-heading">
-                {{question.text|markdown}}
+                <h4>{{question.text|safe}}</h4>
                 {% if question.answerable %}
                     {% if question.is_single_choice %}
                         {% include 'quizblock/single_choice.html' %}

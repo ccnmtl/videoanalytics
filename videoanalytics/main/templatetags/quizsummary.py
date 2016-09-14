@@ -32,15 +32,26 @@ class GetQuizSummary(template.Node):
 
         blocks = get_quizzes_by_css_class(u.profile.default_hierarchy(), cls)
 
-        results = {'correct': [], 'incorrect': []}
+        topics = {}
         for b in blocks:
             for question in b.content_object.question_set.all():
-                if question.is_user_correct(u):
-                    results['correct'].append(question)
-                else:
-                    results['incorrect'].append(question)
+                if question.css_extra not in topics:
+                    topics[question.css_extra] = {
+                        'title': question.css_extra,
+                        'explanation': question.explanation,
+                        'score': 0,
+                        'passed': 0
+                    }
 
-        context[self.var_name] = results
+                if question.is_user_correct(u):
+                    topics[question.css_extra]['score'] += 1
+                    topics[question.css_extra]['passed'] = \
+                        1 if topics[question.css_extra]['score'] > 1 else 0
+
+        values = topics.values()
+        values.sort(key=lambda x: x['passed'])
+        context[self.var_name] = values
+
         return ''
 
 
