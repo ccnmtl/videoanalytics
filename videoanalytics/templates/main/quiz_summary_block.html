@@ -4,29 +4,25 @@
 
     {% get_quiz_summary user cls as results %}
 
-    {% for question in results.incorrect %}
-        {% if forloop.first %}
-            <h3>Recommended Videos</h3>
-            <p>When the student receives an incorrect answer, the associated video is pushed up to the top.</p>
-            <ul>
-        {% endif %}
+    {% for topic in results %}
+        {% ifchanged topic.passed %}
+            {% if topic.passed %}
+                <h3>Related Videos</h3>
+            {% else %}
+                <h3>Recommended Videos</h3>
+            {% endif %}
+        {% endifchanged %}
 
-        <li>{{question.explanation|safe}}</li>
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
+        <div>{{topic.explanation|safe}}</div>
     {% endfor %}
 
-    {% for question in results.correct %}
-        {% if forloop.first %}
-            <h3>Related Videos</h3>
-            <p>All other videos are shown in this list.</p>
-            <ul>
-        {% endif %}
-        <li>{{question.explanation|safe}}</li>
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-    {% endfor %}
+    {% if user.is_superuser %}
+        <h3>Superusers Only</h3>
+        <ul>
+        {% for topic in results %}
+            <li>{{topic.title}} | {{topic.score}} | {{topic.passed }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 
 {% endwith %}
