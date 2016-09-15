@@ -5,8 +5,10 @@ from pagetree.tests.factories import UserFactory, ModuleFactory, \
     UserPageVisitFactory
 from quizblock.models import Quiz, Submission, Response, Question, Answer
 from quizblock.tests.test_templatetags import MockNodeList
+
 from videoanalytics.main.templatetags.accessible import AccessibleNode
-from videoanalytics.main.templatetags.quizsummary import IfQuizCompleteNode
+from videoanalytics.main.templatetags.quizsummary import IfQuizCompleteNode, \
+    GetQuizSummary
 
 
 class TestAccessible(TestCase):
@@ -175,3 +177,101 @@ class IfQuizCompleteTest(TestCase):
         # ques2 response - 3 answers
         Response.objects.create(question=ques2, submission=s, value="b")
         self.assert_render_true()
+
+
+class QuizSummaryTest(TestCase):
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.user.profile.research_group = 'one'
+        self.user.profile.save()
+
+        self.quiz = Quiz.objects.create()
+
+        ModuleFactory('one', '/pages/one/')
+        section = Section.objects.get(slug='one')
+        section.append_pageblock('Q', 'assessment', content_object=self.quiz)
+
+        self.ques1 = Question.objects.create(
+            quiz=self.quiz, text='one', question_type='single choice',
+            css_extra='t1', explanation='a')
+        Answer.objects.create(question=self.ques1, label='a',
+                              value='a', correct=True)
+        Answer.objects.create(question=self.ques1, label='b', value='b')
+
+        self.ques2 = Question.objects.create(
+            quiz=self.quiz, text='two', question_type='single choice',
+            css_extra='t1', explanation='a')
+        Answer.objects.create(
+            question=self.ques2, label='a', value='a', correct=True)
+        Answer.objects.create(question=self.ques2, label='b', value='b')
+
+        self.ques3 = Question.objects.create(
+            quiz=self.quiz, text='three', question_type='single choice',
+            css_extra='t1', explanation='a')
+        Answer.objects.create(
+            question=self.ques3, label='a', value='a', correct=True)
+        Answer.objects.create(question=self.ques3, label='b', value='b')
+
+        ques4 = Question.objects.create(
+            quiz=self.quiz, text='four', question_type='single choice',
+            css_extra='t2', explanation='b')
+        Answer.objects.create(
+            question=ques4, label='a', value='a', correct=True)
+        Answer.objects.create(question=ques4, label='b', value='b')
+
+    def test_no_submission(self):
+        ctx = {'user': self.user, 'cls': 'assessment'}
+
+        # No submission
+        GetQuizSummary('user', 'cls', 'results').render(ctx)
+        self.assertTrue('results' in ctx)
+        self.assertEquals(len(ctx['results']), 2)
+
+        self.assertEquals(ctx['results'][0]['title'], 't1')
+        self.assertEquals(ctx['results'][0]['explanation'], 'a')
+        self.assertEquals(ctx['results'][0]['score'], 0)
+        self.assertFalse(ctx['results'][0]['passed'])
+
+        self.assertEquals(ctx['results'][1]['title'], 't2')
+        self.assertEquals(ctx['results'][1]['explanation'], 'b')
+        self.assertEquals(ctx['results'][1]['score'], 0)
+        self.assertFalse(ctx['results'][1]['passed'])
+
+    def test_one_correct(self):
+        ctx = {'user': self.user, 'cls': 'assessment'}
+        s = Submission.objects.create(quiz=self.quiz, user=self.user)
+        Response.objects.create(question=self.ques1, submission=s, value='a')
+        Response.objects.create(question=self.ques2, submission=s, value='b')
+        Response.objects.create(question=self.ques3, submission=s, value='b')
+
+        GetQuizSummary('user', 'cls', 'results').render(ctx)
+        self.assertEquals(ctx['results'][0]['title'], 't1')
+        self.assertEquals(ctx['results'][0]['score'], 1)
+        self.assertFalse(ctx['results'][0]['passed'])
+
+    def test_two_correct(self):
+        ctx = {'user': self.user, 'cls': 'assessment'}
+        s = Submission.objects.create(quiz=self.quiz, user=self.user)
+        Response.objects.create(question=self.ques1, submission=s, value='a')
+        Response.objects.create(question=self.ques2, submission=s, value='a')
+        Response.objects.create(question=self.ques3, submission=s, value='b')
+
+        GetQuizSummary('user', 'cls', 'results').render(ctx)
+        self.assertEquals(ctx['results'][0]['title'], 't2')
+        self.assertEquals(ctx['results'][1]['title'], 't1')
+        self.assertEquals(ctx['results'][1]['score'], 2)
+        self.assertTrue(ctx['results'][1]['passed'])
+
+    def test_all_correct(self):
+        ctx = {'user': self.user, 'cls': 'assessment'}
+        s = Submission.objects.create(quiz=self.quiz, user=self.user)
+        Response.objects.create(question=self.ques1, submission=s, value='a')
+        Response.objects.create(question=self.ques2, submission=s, value='a')
+        Response.objects.create(question=self.ques3, submission=s, value='a')
+
+        GetQuizSummary('user', 'cls', 'results').render(ctx)
+        self.assertEquals(ctx['results'][0]['title'], 't2')
+        self.assertEquals(ctx['results'][1]['title'], 't1')
+        self.assertEquals(ctx['results'][1]['score'], 3)
+        self.assertTrue(ctx['results'][1]['passed'])

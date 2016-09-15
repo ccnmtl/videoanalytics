@@ -48,9 +48,8 @@ class GetQuizSummary(template.Node):
                     topics[question.css_extra]['passed'] = \
                         1 if topics[question.css_extra]['score'] > 1 else 0
 
-        values = topics.values()
-        values.sort(key=lambda x: x['passed'])
-        context[self.var_name] = values
+        v = sorted(topics.values(), key=lambda x: (x['passed'], x['title']))
+        context[self.var_name] = v
 
         return ''
 
