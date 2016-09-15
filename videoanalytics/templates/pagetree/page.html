@@ -44,6 +44,10 @@
 
                 {% if needs_submit %}
                 {% if is_submitted %}
+                    <br />
+                    <div class="alert alert-success" role="alert">
+                        The assessment is complete. Click Next to see your recommendations.
+                    </div>
                 {% else %}
                 <form name="page" action="." method="post">{% csrf_token %}
                 {% endif %}
@@ -60,8 +64,6 @@
                         {% render block %}
                     </div>
                 {% endfor %}
-
-                {% include "pagetree/toc.html" %}
 
                 {% if needs_submit %}
                 {% if request.user.is_anonymous %}

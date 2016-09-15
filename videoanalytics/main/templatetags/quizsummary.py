@@ -14,10 +14,9 @@ def is_user_correct(user, question):
 
 def get_quizzes_by_css_class(hierarchy, cls):
     ctype = ContentType.objects.get_for_model(Quiz)
-    blocks = PageBlock.objects.filter(content_type__pk=ctype.pk)
-    blocks = blocks.filter(css_extra__contains=cls)
-    blocks = blocks.filter(section__hierarchy=hierarchy)
-    return blocks
+    return PageBlock.objects.filter(
+        content_type__pk=ctype.pk, css_extra__contains=cls,
+        section__hierarchy=hierarchy)
 
 
 class GetQuizSummary(template.Node):
@@ -48,7 +47,8 @@ class GetQuizSummary(template.Node):
                     topics[question.css_extra]['passed'] = \
                         1 if topics[question.css_extra]['score'] > 1 else 0
 
-        v = sorted(topics.values(), key=lambda x: (x['passed'], x['title']))
+        v = sorted(topics.values(),
+                   key=lambda x: (x['passed'], x['explanation']))
         context[self.var_name] = v
 
         return ''
