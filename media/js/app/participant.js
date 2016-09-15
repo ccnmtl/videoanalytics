@@ -4,14 +4,15 @@
     window.ParticipantPageView = Backbone.View.extend({
         events: {
             'click a[disabled="disabled"]': 'onClickDisabled',
+            'click a.video-back': 'onClickBack',
             'click .nav li[disabled="disabled"] a': 'onClickDisabled',
             'click input[name="submit-page"]': 'onSubmitPage'
         },
         initialize: function(options) {
             _.bindAll(this,
                       'onPlayerReady',
-                      'onPlayerStateChange',
-                      'onYouTubeIframeAPIReady',
+                      'onPlayerStateChange', 'onYouTubeIframeAPIReady',
+                      'onClickDisabled', 'onClickBack',
                       'isWatching', 'onSubmitPage', 'isFormComplete',
                       'recordSecondsViewed');
 
@@ -52,8 +53,11 @@
             return true;
         },
         onClickDisabled: function(evt) {
-            evt.preventDefault();
+            evt.stopImmediatePropagation();
             return false;
+        },
+        onClickBack: function(evt) {
+            window.history.back();
         },
         onPlayerReady: function(event) {
             this.video_id = this.player.getVideoData().video_id;
