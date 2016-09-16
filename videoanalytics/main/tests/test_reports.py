@@ -40,11 +40,13 @@ class YouTubeReportColumnTest(TestCase):
         view = UserVideoView.objects.create(user=self.user,
                                             video_id='avideo',
                                             video_duration=200)
-        self.assertEquals(self.column.user_value(self.user), 0)
+        self.assertEquals(self.column.user_value(self.user),
+                          '0.0% (0 seconds)')
 
         view.seconds_viewed = 100
         view.save()
-        self.assertEquals(self.column.user_value(self.user), 50)
+        self.assertEquals(self.column.user_value(self.user),
+                          '50.0% (100 seconds)')
 
 
 class VideoAnalyticsReportTest(TestCase):
@@ -138,7 +140,7 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertEquals(row[2], 50)
         self.assertIsNotNone(row[3])
         self.assertTrue(row[4] > 0)
-        self.assertEquals(row[5], 25.0)
+        self.assertEquals(row[5], '25.0% (50 seconds)')
 
         row = rows.next()
         self.assertEquals(row[0], self.participant2.username)
