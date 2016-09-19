@@ -37,13 +37,17 @@
                     <br />
                     <ul class="pager">
                     <li class="previous">
-                        <a href="#" onclick="window.history.back()">&larr; Previous</a>
+                        <a href="#" class="video-back">&larr; Previous</a>
                       </li>
                     </ul>
                 {% endif %}
 
                 {% if needs_submit %}
                 {% if is_submitted %}
+                    <br />
+                    <div class="alert alert-success" role="alert">
+                        The diagnostic is complete. Click Next below to see your recommendations.
+                    </div>
                 {% else %}
                 <form name="page" action="." method="post">{% csrf_token %}
                 {% endif %}
@@ -61,14 +65,12 @@
                     </div>
                 {% endfor %}
 
-                {% include "pagetree/toc.html" %}
-
                 {% if needs_submit %}
                 {% if request.user.is_anonymous %}
                 {% else %}
 
                 {% if is_submitted %}
-                {% if allow_redo or request.user.is_superuser %}
+                {% if allow_redo or request.user.is_staff %}
                 <form action="." method="post">{% csrf_token %}
                 <input type="hidden" name="action" value="reset" />
                 <input type="submit" value="clear your answers and try again" class="btn" />

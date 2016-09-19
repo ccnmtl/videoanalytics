@@ -1,11 +1,5 @@
 {% load markup quizsummary %}
 
-{% ifquizcomplete block %}
-    <div class="alert alert-success" role="alert">
-      The assessment is complete. Click Next to see your recommendations.
-    </div>
-{% endifquizcomplete %}
-
 {{ block.description|markdown }}
 
 {% for question in block.question_set.all %}

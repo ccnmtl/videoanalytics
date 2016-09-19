@@ -4,6 +4,9 @@ html, body {
 
 body {
     width: 100%;
+}
+
+body.splash {
     background-image: url(../img/bg_cmpd.png);
     background-repeat: repeat;
     background-position: top;
@@ -11,6 +14,11 @@ body {
 
 body > .container-fluid {
     padding: 60px 15px 0;
+    padding-top: 50px; /* required for navbar-fixed */
+}
+
+#content {
+    min-height: 820px;
 }
 
 div {
@@ -19,10 +27,6 @@ div {
 
 .pageblock {
     font-size: 16px;
-}
-
-body > .container-fluid {
-  padding-top: 50px; /* required for navbar-fixed */
 }
 
 html.busy, html.busy * {  
@@ -40,8 +44,12 @@ a[disabled] {
 
 /* Footer------------------------------------------------------------------ */
 
+.edit footer {
+    display: none;
+}
+
 footer {
-    position: absolute;
+    position: relative;
     bottom: 0;
     width: 100%;
     height: 60px;
@@ -494,8 +502,14 @@ and (orientation: portrait) {
     display: none;
 }
 
-.casequestion ol {
+ol.caseanswercontainer {
     display: inline-block;
+    list-style-type: lower-alpha;
+    margin-top: 10px;
+}
+
+ol.caseanswercontainer li label {
+    font-weight: normal;
 }
 
 .pageblock.survey .caseanswercontainer label {
