@@ -14,7 +14,7 @@ from djangowind.views import logout as wind_logout_view
 from pagetree.generic.views import EditView, PageView
 from pagetree.models import Hierarchy
 from pagetree.models import PageBlock
-from quizblock.models import Quiz
+from quizblock.models import Quiz, Submission
 
 from videoanalytics.main.mixins import JSONResponseMixin, LoggedInMixin, \
     LoggedInSuperuserMixin, LoggedInStaffMixin
@@ -76,6 +76,21 @@ class RestrictedPageView(PageView):
             return HttpResponseRedirect(user.profile.last_location_url())
 
         return super(RestrictedPageView, self).perform_checks(request, path)
+
+
+class VideoPageView(PageView):
+
+    def perform_checks(self, request, path):
+        user = self.request.user
+        section = self.get_section(path)
+
+        # users in the 'b' hierarchy must have submissions
+        if (section.hierarchy.name == 'videos' and
+            user.profile.research_group == 'b' and
+                not Submission.objects.filter(user=user).exists()):
+            return HttpResponseRedirect(user.profile.last_location_url())
+
+        return super(VideoPageView, self).perform_checks(request, path)
 
 
 class IndexView(TemplateView):
