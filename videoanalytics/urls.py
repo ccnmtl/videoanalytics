@@ -7,11 +7,10 @@ from django.contrib.auth.views import password_change, password_change_done, \
     password_reset_done, password_reset_confirm, password_reset_complete
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
-from pagetree.generic.views import PageView
 
 from videoanalytics.main.views import IndexView, LoginView, \
     LogoutView, ReportView, RestrictedEditView, RestrictedPageView, \
-    TrackVideoView
+    TrackVideoView, VideoPageView
 
 
 admin.autodiscover()
@@ -87,7 +86,7 @@ urlpatterns = patterns(
     # Videos
     (r'^pages/videos/edit/(?P<path>.*)$', RestrictedEditView.as_view(
         hierarchy_name="videos", hierarchy_base="/pages/videos/")),
-    (r'^pages/videos/(?P<path>.*)$', login_required(PageView.as_view(
+    (r'^pages/videos/(?P<path>.*)$', login_required(VideoPageView.as_view(
         hierarchy_name="videos", hierarchy_base="/pages/videos/", gated=True)),
      {}, 'view-beta-page')
 )
