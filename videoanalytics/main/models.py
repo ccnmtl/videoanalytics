@@ -177,8 +177,7 @@ class YouTubeReportColumn(ReportColumnInterface):
         try:
             view = UserVideoView.objects.get(user=user,
                                              video_id=self.identifier())
-            return '{}% ({} seconds)'.format(
-                view.percent_viewed(), view.seconds_viewed)
+            return '{}'.format(view.percent_viewed())
         except UserVideoView.DoesNotExist:
             return 0
 
