@@ -7,6 +7,10 @@ from django.db.models.signals import post_save
 from pagetree.models import Hierarchy, UserPageVisit, PageBlock
 from pagetree.reports import PagetreeReport, ReportableInterface, \
     StandaloneReportColumn, ReportColumnInterface
+from quizblock.models import Submission
+
+from videoanalytics.main.templatetags.quizsummary import \
+    get_quizzes_by_css_class, get_quiz_summary_by_category
 
 
 class UserProfile(models.Model):
@@ -20,6 +24,9 @@ class UserProfile(models.Model):
 
     def default_hierarchy(self):
         return Hierarchy.get_hierarchy(self.research_group)
+
+    def in_control_group(self):
+        return self.default_hierarchy().name == 'a'
 
     def default_location(self):
         return self.default_hierarchy().get_root()
@@ -101,8 +108,34 @@ class UserVideoView(models.Model):
     class Meta:
         unique_together = (('user', 'video_id'),)
 
-####################
-# custom pageblocks
+
+class QuizSummaryReportColumn(ReportColumnInterface):
+    def __init__(self, topic):
+        self.topic = topic
+
+    def identifier(self):
+        return self.topic
+
+    def metadata(self):
+        '''hierarchy, itemIdentifier', 'group', 'item type', 'item text' '''
+        return ['', self.identifier(), 'Aggregate Quiz Score',
+                '# correct', '']
+
+    def user_value(self, user):
+        if user.profile.in_control_group():
+            return '-'
+
+        if not Submission.objects.filter(user=user).exists():
+            return ''
+
+        blocks = get_quizzes_by_css_class(
+            user.profile.default_hierarchy(), 'assessment')
+        values = get_quiz_summary_by_category(blocks, user)
+
+        if self.identifier() in values:
+            return values[self.identifier()]['score']
+        else:
+            return ''
 
 
 class QuizSummaryBlock(models.Model):
@@ -152,11 +185,26 @@ class QuizSummaryBlock(models.Model):
             quiz_class=d.get('quiz_class', '')
         )
 
+    def report_metadata(self):
+        return self.report_columns()
+
+    def report_values(self):
+        return self.report_columns()
+
+    def report_columns(self):
+        return [QuizSummaryReportColumn('thermodynamics'),
+                QuizSummaryReportColumn('reaction_classes'),
+                QuizSummaryReportColumn('redox_chemistry'),
+                QuizSummaryReportColumn('mechanisms'),
+                QuizSummaryReportColumn('paper_figures')]
+
 
 class QuizSummaryForm(forms.ModelForm):
     class Meta:
         model = QuizSummaryBlock
         exclude = []
+
+ReportableInterface.register(QuizSummaryBlock)
 
 
 class YouTubeReportColumn(ReportColumnInterface):
