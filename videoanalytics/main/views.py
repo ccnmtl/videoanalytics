@@ -84,9 +84,9 @@ class VideoPageView(PageView):
         user = self.request.user
         section = self.get_section(path)
 
-        # users in the 'b' hierarchy must have submissions
+        # users in the diagnostic hierarchy must have submissions
         if (section.hierarchy.name == 'videos' and
-            user.profile.research_group == 'b' and
+            not user.profile.in_control_group() and
                 not Submission.objects.filter(user=user).exists()):
             return HttpResponseRedirect(user.profile.last_location_url())
 
