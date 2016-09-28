@@ -41,23 +41,24 @@ class UserProfile(models.Model):
         return self.default_hierarchy().get_root()
 
     def last_access_formatted(self):
-        dt = self._last_access_hierarchy(self.research_group)
+        dt = self._last_access_hierarchy()
         return dt.strftime('%Y-%m-%dT%H:%M:%S') if dt else ''
 
-    def _last_access_hierarchy(self, hierarchy_name):
-        hierarchy = Hierarchy.get_hierarchy(hierarchy_name)
+    def _last_access_hierarchy(self):
+        hierarchy = self.default_hierarchy()
 
         upv = UserPageVisit.objects.filter(
             user=self.user, section__hierarchy=hierarchy).order_by(
-            '-last_visit')
-        if upv.count() < 1:
-            return None
-        else:
-            return upv[0].last_visit
+            '-last_visit').first()
+
+        if upv:
+            return upv.last_visit
+
+        return None
 
     def last_location_url(self):
         if self.percent_complete() == 0:
-            hierarchy = Hierarchy.get_hierarchy(self.research_group)
+            hierarchy = self.default_hierarchy()
             section = hierarchy.get_root().get_first_child()
         else:
             section = self.last_location()
@@ -65,7 +66,7 @@ class UserProfile(models.Model):
         return section.get_absolute_url()
 
     def last_location(self):
-        hierarchy = Hierarchy.get_hierarchy(self.research_group)
+        hierarchy = self.default_hierarchy()
         upv = UserPageVisit.objects.filter(
             user=self.user, section__hierarchy=hierarchy).order_by(
             '-last_visit')
@@ -75,7 +76,7 @@ class UserProfile(models.Model):
             return upv[0].section
 
     def percent_complete(self):
-        hierarchy = Hierarchy.get_hierarchy(self.research_group)
+        hierarchy = self.default_hierarchy()
         pages = hierarchy.get_root().get_descendants().count()
         visits = UserPageVisit.objects.filter(
             user=self.user, section__hierarchy=hierarchy).count()
@@ -85,7 +86,7 @@ class UserProfile(models.Model):
             return 0
 
     def time_spent(self):
-        hierarchy = Hierarchy.get_hierarchy(self.research_group)
+        hierarchy = self.default_hierarchy()
         visits = UserPageVisit.objects.filter(user=self.user,
                                               section__hierarchy=hierarchy)
 
