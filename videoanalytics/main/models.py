@@ -12,10 +12,13 @@ from quizblock.models import Submission
 from videoanalytics.main.templatetags.quizsummary import \
     get_quizzes_by_css_class, get_quiz_summary_by_category
 
+CONTROL_GROUP = 'a'
+DIAGNOSTIC_GROUP = 'b'
+
 
 class UserProfile(models.Model):
     user = OneToOneField(User, related_name='profile')
-    research_group = models.CharField(max_length=1, default='a')
+    research_group = models.CharField(max_length=1, default=CONTROL_GROUP)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     modified = models.DateTimeField(auto_now=True, editable=False)
 
@@ -26,7 +29,7 @@ class UserProfile(models.Model):
         return Hierarchy.get_hierarchy(self.research_group)
 
     def in_control_group(self):
-        return self.default_hierarchy().name == 'a'
+        return self.default_hierarchy().name == CONTROL_GROUP
 
     def default_location(self):
         return self.default_hierarchy().get_root()
