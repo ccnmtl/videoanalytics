@@ -1,7 +1,9 @@
 # flake8: noqa
 # Django settings for videoanalytics project.
 import os.path
+import sys
 from ccnmtlsettings.shared import common
+
 
 project = 'videoanalytics'
 base = os.path.dirname(__file__)
@@ -42,3 +44,11 @@ PAGEBLOCKS = [
     'main.YouTubeBlock']
 
 MEDIA_ROOT = 'uploads'
+
+
+if 'test' in sys.argv or 'jenkins' in sys.argv:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            }
+        }

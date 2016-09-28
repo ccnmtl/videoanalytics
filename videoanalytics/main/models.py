@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.cache import cache
 from django.db import models
 from django.db.models.fields.related import OneToOneField
 from django.db.models.signals import post_save
@@ -26,7 +27,12 @@ class UserProfile(models.Model):
         return not self.user.is_active
 
     def default_hierarchy(self):
-        return Hierarchy.get_hierarchy(self.research_group)
+        key = 'hierarchy_{}'.format(self.id)
+        h = cache.get(key)
+        if h is None:
+            h = Hierarchy.get_hierarchy(self.research_group)
+            cache.set(key, h)
+        return h
 
     def in_control_group(self):
         return self.default_hierarchy().name == CONTROL_GROUP
