@@ -1,5 +1,6 @@
 from django import template
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from pagetree.models import PageBlock
 from quizblock.models import Quiz
 
@@ -13,10 +14,16 @@ def is_user_correct(user, question):
 
 
 def get_quizzes_by_css_class(hierarchy, cls):
-    ctype = ContentType.objects.get_for_model(Quiz)
-    return PageBlock.objects.filter(
-        content_type__pk=ctype.pk, css_extra__contains=cls,
-        section__hierarchy=hierarchy)
+    key = 'hierarchy_{}_{}'.format(hierarchy.id, cls)
+    quizzes = cache.get(key)
+    if quizzes is None:
+        ctype = ContentType.objects.get_for_model(Quiz)
+        quizzes = PageBlock.objects.filter(
+            content_type__pk=ctype.pk, css_extra__contains=cls,
+            section__hierarchy=hierarchy).prefetch_related(
+                'content_object__question_set')
+        cache.set(key, quizzes)
+    return quizzes
 
 
 def get_quiz_summary_by_category(blocks, user):

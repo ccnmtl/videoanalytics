@@ -140,6 +140,9 @@ class QuizSummaryReportColumn(ReportColumnInterface):
 
         blocks = get_quizzes_by_css_class(
             user.profile.default_hierarchy(), 'assessment')
+        if not blocks.exists():
+            return ''
+
         values = get_quiz_summary_by_category(blocks, user)
 
         if self.identifier() in values:
@@ -316,7 +319,7 @@ class VideoAnalyticsReport(PagetreeReport):
 
     def users(self):
         users = User.objects.exclude(is_superuser=True, is_staff=True)
-        return users.order_by('id')
+        return users.order_by('id').select_related('profile')
 
     def standalone_columns(self):
         return [
