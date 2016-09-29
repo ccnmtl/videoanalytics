@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Please Login{% endblock %}
+
+{% block bodyclass %}splash{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <div class="getting-started">
+            <input id="guest-login" class="btn btn-primary btn-lg" type="button" value="Get Started"
+                {% if form.errors %}style="display: none"{% endif %}
+                onclick="jQuery('.login-local-form').show(); jQuery(this).hide(); return false;"/>
+
+            <form id="login-local" name="login_local" method="post" action=".">
+                {% csrf_token %}
+                <div class="login-local-form" {% if not form.errors %}style="display: none"{% endif %}>
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <div><b>Invalid username/password</b></div>
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        <input id="id_username" maxlength="254"
+                               name="username" type="text"
+                               class="form-control" autofocus>
+                    </div><!-- fieldwrapper -->
+
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        <input id="id_password" name="password" type="password" class="form-control">
+                    </div><!-- fieldwrapper -->
+                    <p class="small"><a href="/accounts/password_reset/">Forgot Password?</a></p>
+                    <input class="btn btn-primary" type="submit" value="Log In" />
+                    <input type="hidden" name="next" value="/" />
+                </div>
+            </form>
+            <br />
+        </div>
+    </div>
+{% endblock %}

@@ -1,5 +1,3 @@
-import json
-
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
@@ -13,7 +11,7 @@ class BasicTest(TestCase):
 
     def test_root(self):
         response = self.client.get("/")
-        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.status_code, 302)
 
     def test_smoketest(self):
         response = self.client.get("/smoketest/")
@@ -107,10 +105,9 @@ class ChangePasswordTest(TestCase):
 class IndexViewTest(TestCase):
 
     def test_anonymous_user(self):
-        response = self.client.get('/')
-        self.assertTrue('Log In' in response.content)
+        response = self.client.get('/', follow=True)
+        self.assertTrue('Get Started' in response.content)
         self.assertFalse('Log Out' in response.content)
-        self.assertEquals(response.template_name[0], "main/splash.html")
         self.assertEquals(response.status_code, 200)
 
     def test_user(self):
@@ -129,52 +126,6 @@ class IndexViewTest(TestCase):
             username=user.username, password="test"))
         response = self.client.get('/')
         self.assertEquals(response.status_code, 302)
-
-
-class LoginTest(TestCase):
-
-    def test_login_get(self):
-        response = self.client.get('/accounts/login/')
-        self.assertEquals(response.status_code, 405)
-
-    def test_login_post_noajax(self):
-        user = UserFactory()
-        response = self.client.post('/accounts/login/',
-                                    {'username': user.username,
-                                     'password': 'test'})
-        self.assertEquals(response.status_code, 405)
-
-    def test_login_post_ajax(self):
-        user = UserFactory()
-        response = self.client.post('/accounts/login/',
-                                    {'username': '',
-                                     'password': ''},
-                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEquals(response.status_code, 200)
-        the_json = json.loads(response.content)
-        self.assertTrue(the_json['error'], True)
-
-        response = self.client.post('/accounts/login/',
-                                    {'username': user.username,
-                                     'password': 'test'},
-                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEquals(response.status_code, 200)
-        the_json = json.loads(response.content)
-        self.assertTrue(the_json['next'], "/")
-        self.assertTrue('error' not in the_json)
-
-
-class LogoutTest(TestCase):
-
-    def test_logout_user(self):
-        user = UserFactory()
-        self.client.login(username=user.username, password="test")
-
-        response = self.client.get('/accounts/logout/?next=/', follow=True)
-        self.assertEquals(response.template_name[0], "main/splash.html")
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue('Log In' in response.content)
-        self.assertFalse('Log Out' in response.content)
 
 
 class ReportViewTest(TestCase):

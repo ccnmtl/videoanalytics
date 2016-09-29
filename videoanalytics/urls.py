@@ -8,9 +8,8 @@ from django.contrib.auth.views import password_change, password_change_done, \
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
-from videoanalytics.main.views import IndexView, LoginView, \
-    LogoutView, ReportView, RestrictedEditView, RestrictedPageView, \
-    TrackVideoView, VideoPageView
+from videoanalytics.main.views import IndexView, ReportView, \
+    RestrictedEditView, RestrictedPageView, TrackVideoView, VideoPageView
 
 
 admin.autodiscover()
@@ -40,8 +39,6 @@ urlpatterns = patterns(
     '',
     (r'^$', ensure_csrf_cookie(IndexView.as_view())),
     (r'^admin/', include(admin.site.urls)),
-    (r'^accounts/login/$', LoginView.as_view()),
-    (r'^accounts/logout/$', LogoutView.as_view()),
 
     # password change & reset. overriding to gate them.
     url(r'^accounts/password_change/$',

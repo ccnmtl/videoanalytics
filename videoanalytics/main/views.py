@@ -1,14 +1,10 @@
 import csv
 
 from django.conf import settings
-from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import logout as auth_logout_view
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.http.response import HttpResponseRedirect, StreamingHttpResponse
-from django.views.generic.base import TemplateView, View
-from djangowind.views import logout as wind_logout_view
+from django.views.generic.base import View
 from pagetree.generic.views import EditView, PageView
 from pagetree.models import Hierarchy
 from pagetree.models import PageBlock
@@ -31,32 +27,6 @@ def get_quiz_blocks(css_class):
     blocks = PageBlock.objects.filter(css_extra=css_class,
                                       content_type=quiz_type)
     return blocks
-
-
-class LoginView(JSONResponseMixin, View):
-
-    def post(self, request):
-        request.session.set_test_cookie()
-        login_form = AuthenticationForm(request, request.POST)
-        if login_form.is_valid():
-            login(request, login_form.get_user())
-            if request.user is not None:
-                next_url = request.POST.get('next', '/')
-                return self.render_to_json_response({'next': next_url})
-        else:
-            return self.render_to_json_response({'error': True})
-
-
-class LogoutView(LoggedInMixin, View):
-
-    def get(self, request):
-        if request.user.profile.is_participant():
-            url = request.user.profile.last_location_url()
-            return HttpResponseRedirect(url)
-        elif hasattr(settings, 'WIND_BASE'):
-            return wind_logout_view(request, next_page="/")
-        else:
-            return auth_logout_view(request, "/")
 
 
 class RestrictedEditView(LoggedInSuperuserMixin, EditView):
@@ -91,15 +61,11 @@ class VideoPageView(PageView):
         return super(VideoPageView, self).perform_checks(request, path)
 
 
-class IndexView(TemplateView):
-    template_name = 'main/splash.html'
+class IndexView(LoggedInMixin, View):
 
-    def dispatch(self, *args, **kwargs):
+    def get(self, *args, **kwargs):
         user = self.request.user
-        if not user.is_anonymous():
-            return HttpResponseRedirect(user.profile.last_location_url())
-
-        return super(IndexView, self).dispatch(*args, **kwargs)
+        return HttpResponseRedirect(user.profile.last_location_url())
 
 
 class TrackVideoView(LoggedInMixin, JSONResponseMixin, View):
