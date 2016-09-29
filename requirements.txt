@@ -1,5 +1,5 @@
 --index-url https://pypi.ccnmtl.columbia.edu/
-Django==1.9.9
+Django==1.9.10
 feedparser==5.2.1
 Markdown==2.6.7
 simplejson==3.8.2
@@ -47,7 +47,7 @@ Jinja2==2.8
 Markupsafe==0.23
 
 django-bootstrap3==7.1.0
-djangowind==0.15.0
+djangowind==0.16.0
 sorl==3.1
 typogrify==2.0.7
 django-staticmedia==0.2.2

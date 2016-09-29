@@ -46,6 +46,26 @@ def get_quiz_summary_by_category(blocks, user):
     return topics
 
 
+def get_quiz_summary_by_category(blocks, user):
+    topics = {}
+    for b in blocks:
+        for question in b.content_object.question_set.all():
+            if question.css_extra not in topics:
+                topics[question.css_extra] = {
+                    'title': question.css_extra,
+                    'explanation': question.explanation,
+                    'score': 0,
+                    'passed': 0
+                }
+
+            if question.is_user_correct(user):
+                topics[question.css_extra]['score'] += 1
+                topics[question.css_extra]['passed'] = \
+                    1 if topics[question.css_extra]['score'] > 1 else 0
+
+    return topics
+
+
 class GetQuizSummary(template.Node):
     def __init__(self, user, quiz_class, var_name):
         self.user = user

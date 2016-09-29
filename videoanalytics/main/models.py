@@ -37,6 +37,9 @@ class UserProfile(models.Model):
     def in_control_group(self):
         return self.default_hierarchy().name == CONTROL_GROUP
 
+    def in_control_group(self):
+        return self.default_hierarchy().name == CONTROL_GROUP
+
     def default_location(self):
         return self.default_hierarchy().get_root()
 
@@ -140,6 +143,7 @@ class QuizSummaryReportColumn(ReportColumnInterface):
 
         blocks = get_quizzes_by_css_class(
             user.profile.default_hierarchy(), 'assessment')
+
         if not blocks.exists():
             return ''
 
