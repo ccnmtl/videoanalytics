@@ -318,7 +318,7 @@ ReportableInterface.register(YouTubeBlock)
 class VideoAnalyticsReport(PagetreeReport):
 
     def users(self):
-        users = User.objects.exclude(is_superuser=True, is_staff=True)
+        users = User.objects.exclude(is_superuser=True).exclude(is_staff=True)
         return users.order_by('id').select_related('profile')
 
     def standalone_columns(self):
