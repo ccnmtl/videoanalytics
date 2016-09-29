@@ -1,6 +1,4 @@
-from StringIO import StringIO
 import csv
-from zipfile import ZipFile
 
 from django.conf import settings
 from django.contrib.auth import login
@@ -8,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import logout as auth_logout_view
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, StreamingHttpResponse
 from django.views.generic.base import TemplateView, View
 from djangowind.views import logout as wind_logout_view
 from pagetree.generic.views import EditView, PageView
@@ -127,40 +125,32 @@ class TrackVideoView(LoggedInMixin, JSONResponseMixin, View):
         return self.render_to_json_response(context)
 
 
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
 class ReportView(LoggedInStaffMixin, View):
 
     def get(self, request):
         report = VideoAnalyticsReport()
-
-        # setup zip file for the key & value file
-        response = HttpResponse(content_type='application/zip')
-
-        disposition = 'attachment; filename=videoanalytics.zip'
-        response['Content-Disposition'] = disposition
-
-        z = ZipFile(response, 'w')
-
-        output = StringIO()  # temp output file
-        writer = csv.writer(output)
-
-        # report on all hierarchies
         hierarchies = Hierarchy.objects.all()
 
-        # Key file
-        for row in report.metadata(hierarchies):
-            writer.writerow(row)
+        report_type = request.GET.get('type', 'key')
+        if report_type == 'values':
+            rows = report.values(hierarchies)
+        else:
+            rows = report.metadata(hierarchies)
 
-        z.writestr("videoanalytics_key.csv", output.getvalue())
+        pseudo_buffer = Echo()
+        writer = csv.writer(pseudo_buffer)
 
-        # Results file
-        output.truncate(0)
-        output.seek(0)
-
-        writer = csv.writer(output)
-
-        for row in report.values(hierarchies):
-            writer.writerow(row)
-
-        z.writestr("videoanalytics_values.csv", output.getvalue())
-
+        fnm = "videoanalytics_%s.csv" % report_type
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in rows), content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="' + fnm + '"'
         return response

@@ -69,7 +69,10 @@
                         {% endif %}
                         {% if user.is_staff %}
                             <li>
-                                <a href="/report/">Report</a>
+                                <a href="/report/">Report Keys</a>
+                            </li>
+                            <li>
+                                <a href="/report/?type=values">Report Values</a>
                             </li>
                         {% endif %}
                         {% if user.is_superuser %}
