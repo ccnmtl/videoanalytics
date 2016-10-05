@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models.fields.related import OneToOneField
 from django.db.models.signals import post_save
+from django.utils import timezone
 from pagetree.models import Hierarchy, UserPageVisit, PageBlock
 from pagetree.reports import PagetreeReport, ReportableInterface, \
     StandaloneReportColumn, ReportColumnInterface
@@ -11,6 +12,7 @@ from quizblock.models import Submission
 
 from videoanalytics.main.templatetags.quizsummary import \
     get_quizzes_by_css_class, get_quiz_summary_by_category
+
 
 CONTROL_GROUP = 'a'
 DIAGNOSTIC_GROUP = 'b'
@@ -34,20 +36,25 @@ class UserProfile(models.Model):
     def default_location(self):
         return self.default_hierarchy().get_root()
 
+    def first_access_formatted(self):
+        upv = UserPageVisit.objects.filter(user=self.user).exclude(
+            first_visit__isnull=True).order_by('first_visit').first()
+
+        if upv:
+            dt = timezone.localtime(upv.first_visit)
+            return dt.strftime('%b %d, %Y %H:%M:%S')
+
+        return ''
+
     def last_access_formatted(self):
-        dt = self._last_access_hierarchy(self.research_group)
-        return dt.strftime('%Y-%m-%dT%H:%M:%S') if dt else ''
+        upv = UserPageVisit.objects.filter(user=self.user).exclude(
+            last_visit__isnull=True).order_by('-last_visit').first()
 
-    def _last_access_hierarchy(self, hierarchy_name):
-        hierarchy = Hierarchy.get_hierarchy(hierarchy_name)
+        if upv:
+            dt = timezone.localtime(upv.last_visit)
+            return dt.strftime('%b %d, %Y %H:%M:%S')
 
-        upv = UserPageVisit.objects.filter(
-            user=self.user, section__hierarchy=hierarchy).order_by(
-            '-last_visit')
-        if upv.count() < 1:
-            return None
-        else:
-            return upv[0].last_visit
+        return ''
 
     def last_location_url(self):
         if self.percent_complete() == 0:
@@ -308,7 +315,7 @@ ReportableInterface.register(YouTubeBlock)
 class VideoAnalyticsReport(PagetreeReport):
 
     def users(self):
-        users = User.objects.exclude(is_superuser=True, is_staff=True)
+        users = User.objects.exclude(is_superuser=True).exclude(is_staff=True)
         return users.order_by('id')
 
     def standalone_columns(self):
@@ -323,6 +330,9 @@ class VideoAnalyticsReport(PagetreeReport):
                 'percent_complete', 'profile', 'percent',
                 '% of hierarchy completed',
                 lambda x: x.profile.percent_complete()),
+            StandaloneReportColumn(
+                'first_access', 'profile', 'date string', 'first access date',
+                lambda x: x.profile.first_access_formatted()),
             StandaloneReportColumn(
                 'last_access', 'profile', 'date string', 'last access date',
                 lambda x: x.profile.last_access_formatted()),

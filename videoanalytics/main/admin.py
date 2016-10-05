@@ -4,7 +4,16 @@ from pagetree.models import Hierarchy, UserLocation, UserPageVisit
 
 admin.site.register(Hierarchy)
 admin.site.register(UserLocation)
-admin.site.register(UserPageVisit)
+
+
+class UserPageVisitAdmin(admin.ModelAdmin):
+    class Meta:
+        model = UserPageVisit
+
+    search_fields = ("user__username",)
+    list_display = ("user", "section", "status", "first_visit", "last_visit")
+
+admin.site.register(UserPageVisit, UserPageVisitAdmin)
 
 
 class UserVideoViewAdmin(admin.ModelAdmin):
