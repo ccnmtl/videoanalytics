@@ -85,18 +85,6 @@ class UserProfile(models.Model):
         else:
             return 0
 
-    def time_spent(self):
-        hierarchy = Hierarchy.get_hierarchy(self.research_group)
-        visits = UserPageVisit.objects.filter(user=self.user,
-                                              section__hierarchy=hierarchy)
-
-        seconds = 0
-        if (visits.count() > 0):
-            start = visits.order_by('first_visit')[0].first_visit
-            end = visits.order_by('-last_visit')[0].last_visit
-            seconds = (end - start).total_seconds() / 60
-        return seconds
-
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -335,7 +323,4 @@ class VideoAnalyticsReport(PagetreeReport):
                 lambda x: x.profile.first_access_formatted()),
             StandaloneReportColumn(
                 'last_access', 'profile', 'date string', 'last access date',
-                lambda x: x.profile.last_access_formatted()),
-            StandaloneReportColumn(
-                'time_spent', 'profile', 'integer', 'minutes',
-                lambda x: x.profile.time_spent())]
+                lambda x: x.profile.last_access_formatted())]

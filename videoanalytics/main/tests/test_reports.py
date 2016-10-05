@@ -116,10 +116,6 @@ class VideoAnalyticsReportTest(TestCase):
                                         'profile', 'date string',
                                         'last access date'])
 
-        # en time spent
-        self.assertEquals(rows.next(), ['', 'time_spent',
-                                        'profile', 'integer', 'minutes'])
-
         youtube_metadata = [u'a', u'avideo', 'YouTube Video',
                             'percent viewed', u'Title']
         self.assertEquals(rows.next(), youtube_metadata)
@@ -133,7 +129,7 @@ class VideoAnalyticsReportTest(TestCase):
         rows = self.report.values([self.hierarchy_a])
         header = ['participant_id', 'research_group',
                   'percent_complete', 'first_access', 'last_access',
-                  'time_spent', 'avideo']
+                  'avideo']
         self.assertEquals(rows.next(), header)
 
         row = rows.next()
@@ -141,9 +137,8 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertEquals(row[1], 'a')
         self.assertEquals(row[2], 50)
         self.assertIsNotNone(row[3])
-        self.assertTrue(row[4] > 0)
-        self.assertTrue(row[5] > 0)
-        self.assertEquals(row[6], '25.0')
+        self.assertIsNotNone(row[4])
+        self.assertEquals(row[5], '25.0')
 
         row = rows.next()
         self.assertEquals(row[0], self.participant2.username)
@@ -152,7 +147,6 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertEquals(row[3], '')
         self.assertEquals(row[4], '')
         self.assertEquals(row[5], 0)
-        self.assertEquals(row[6], 0)
 
         try:
             rows.next()
