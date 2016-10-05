@@ -107,7 +107,11 @@ class VideoAnalyticsReportTest(TestCase):
                                         'profile',
                                         'percent', '% of hierarchy completed'])
 
-        # en last access
+        # first access
+        self.assertEquals(rows.next(), ['', 'first_access',
+                                        'profile', 'date string',
+                                        'first access date'])
+        # last access
         self.assertEquals(rows.next(), ['', 'last_access',
                                         'profile', 'date string',
                                         'last access date'])
@@ -128,7 +132,7 @@ class VideoAnalyticsReportTest(TestCase):
     def test_values(self):
         rows = self.report.values([self.hierarchy_a])
         header = ['participant_id', 'research_group',
-                  'percent_complete', 'last_access',
+                  'percent_complete', 'first_access', 'last_access',
                   'time_spent', 'avideo']
         self.assertEquals(rows.next(), header)
 
@@ -138,15 +142,17 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertEquals(row[2], 50)
         self.assertIsNotNone(row[3])
         self.assertTrue(row[4] > 0)
-        self.assertEquals(row[5], '25.0')
+        self.assertTrue(row[5] > 0)
+        self.assertEquals(row[6], '25.0')
 
         row = rows.next()
         self.assertEquals(row[0], self.participant2.username)
         self.assertEquals(row[1], 'a')
         self.assertEquals(row[2], 0)
         self.assertEquals(row[3], '')
-        self.assertEquals(row[4], 0)
+        self.assertEquals(row[4], '')
         self.assertEquals(row[5], 0)
+        self.assertEquals(row[6], 0)
 
         try:
             rows.next()
