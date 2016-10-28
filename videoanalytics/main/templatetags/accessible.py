@@ -16,7 +16,7 @@ class AccessibleNode(template.Node):
             u = r.user
 
             visited, last_section = m.gate_check(u)
-            if visited and m.submitted(u):
+            if visited:
                 return self.nodelist_true.render(context)
 
         return self.nodelist_false.render(context)
