@@ -16,91 +16,58 @@ class TestAccessible(TestCase):
     def setUp(self):
         self.user = UserFactory(is_superuser=True)
 
-        ModuleFactory("one", "/pages/one/")
+        ModuleFactory('one', '/pages/one/')
         self.hierarchy = Hierarchy.objects.get(name='one')
 
-        self.section_one = Section.objects.get(slug='one')
-
-        self.hierarchy.get_root().add_child_section_from_dict({
-            'label': 'Page Four',
-            'slug': 'page-four',
-            'pageblocks': [{
-                'label': 'Content',
-                'css_extra': '',
-                'block_type': 'Quiz',
-                'body': 'random text goes here',
-                'description': 'a description',
-                'rhetorical': False,
-                'questions': [{
-                    'question_type': 'short text',
-                    'text': 'a question',
-                    'explanation': 'an explanation',
-                    'intro_text': 'intro text',
-                    'answers': []
-                }]
-            }]
-        })
-        self.section_four = Section.objects.get(slug='page-four')
+        self.sections = self.hierarchy.get_root().get_descendants()
 
         self.request = RequestFactory().get('/pages/%s/' % self.hierarchy.name)
         self.request.user = self.user
 
-    def test_render_no_pageblocks(self):
+    def test_render_first_page(self):
         nlTrue = MockNodeList()
         nlFalse = MockNodeList()
 
         node = AccessibleNode('section', nlTrue, nlFalse)
-        context = dict(request=self.request, section=self.section_one)
+        context = dict(request=self.request, section=self.sections[0])
         out = node.render(context)
         self.assertEqual(out, None)
         self.assertTrue(nlTrue.rendered)
         self.assertFalse(nlFalse.rendered)
 
-    def test_render_quizblock_novisits(self):
+    def test_render_no_visits(self):
         nlTrue = MockNodeList()
         nlFalse = MockNodeList()
 
         node = AccessibleNode('section', nlTrue, nlFalse)
-        context = dict(request=self.request, section=self.section_four)
+        context = dict(request=self.request, section=self.sections[1])
         out = node.render(context)
         self.assertEqual(out, None)
         self.assertFalse(nlTrue.rendered)
         self.assertTrue(nlFalse.rendered)
 
-    def test_render_quizblock_visits_and_nosubmissions(self):
-        UserPageVisitFactory(user=self.user,  status='complete',
-                             section=self.hierarchy.get_root())
-        for section in self.hierarchy.get_root().get_descendants():
-            UserPageVisitFactory(
-                user=self.user,  status='complete', section=section)
+    def test_render_incomplete_visit(self):
+        UserPageVisitFactory(user=self.user, section=self.sections[0])
 
         nlTrue = MockNodeList()
         nlFalse = MockNodeList()
 
         node = AccessibleNode('section', nlTrue, nlFalse)
-        context = dict(request=self.request, section=self.section_four)
+        context = dict(request=self.request, section=self.sections[1])
         out = node.render(context)
         self.assertEqual(out, None)
         self.assertFalse(nlTrue.rendered)
         self.assertTrue(nlFalse.rendered)
 
-    def test_issubmitted_quizblock_visits_and_submissions(self):
-        UserPageVisitFactory(user=self.user, status='complete',
-                             section=self.hierarchy.get_root())
-        for section in self.hierarchy.get_root().get_descendants():
-            UserPageVisitFactory(
-                user=self.user,  status='complete', section=section)
-
-        quiz = Quiz.objects.all()[0]
-        question = quiz.question_set.all()[0]
-        s = Submission.objects.create(quiz=quiz, user=self.user)
-        Response.objects.create(question=question, submission=s, value="a")
+    def test_render_complete_visit(self):
+        UserPageVisitFactory(
+            user=self.user, section=self.sections[0], status='complete')
 
         nlTrue = MockNodeList()
         nlFalse = MockNodeList()
 
         node = AccessibleNode('section', nlTrue, nlFalse)
-        context = dict(request=self.request, section=self.section_four)
+        context = dict(request=self.request, section=self.sections[1])
         out = node.render(context)
         self.assertEqual(out, None)
         self.assertTrue(nlTrue.rendered)
@@ -141,19 +108,19 @@ class IfQuizCompleteTest(TestCase):
         self.assertTrue(nl2.rendered)
 
     def test_quiz_complete(self):
-        ques1 = Question.objects.create(quiz=self.quiz, text="question_one",
-                                        question_type="single choice")
-        Answer.objects.create(question=ques1, label="a",
-                              value="a", correct=True)
-        Answer.objects.create(question=ques1, label="b", value="b")
+        ques1 = Question.objects.create(quiz=self.quiz, text='question_one',
+                                        question_type='single choice')
+        Answer.objects.create(question=ques1, label='a',
+                              value='a', correct=True)
+        Answer.objects.create(question=ques1, label='b', value='b')
 
-        ques2 = Question.objects.create(quiz=self.quiz, text="question_two",
-                                        question_type="multiple choice")
-        Answer.objects.create(question=ques2, label="a",
-                              value="a", correct=True)
-        Answer.objects.create(question=ques2, label="b", value="b")
-        Answer.objects.create(question=ques2, label="c",
-                              value="c", correct=True)
+        ques2 = Question.objects.create(quiz=self.quiz, text='question_two',
+                                        question_type='multiple choice')
+        Answer.objects.create(question=ques2, label='a',
+                              value='a', correct=True)
+        Answer.objects.create(question=ques2, label='b', value='b')
+        Answer.objects.create(question=ques2, label='c',
+                              value='c', correct=True)
 
         # No submission
         self.assert_render_false()
@@ -163,19 +130,19 @@ class IfQuizCompleteTest(TestCase):
         self.assert_render_false()
 
         # ques1 response (single choice)
-        Response.objects.create(question=ques1, submission=s, value="a")
+        Response.objects.create(question=ques1, submission=s, value='a')
         self.assert_render_false()
 
         # ques2 response - 1 answer
-        Response.objects.create(question=ques2, submission=s, value="a")
+        Response.objects.create(question=ques2, submission=s, value='a')
         self.assert_render_true()
 
         # ques2 response - 2 answers
-        Response.objects.create(question=ques2, submission=s, value="b")
+        Response.objects.create(question=ques2, submission=s, value='b')
         self.assert_render_true()
 
         # ques2 response - 3 answers
-        Response.objects.create(question=ques2, submission=s, value="b")
+        Response.objects.create(question=ques2, submission=s, value='b')
         self.assert_render_true()
 
 
