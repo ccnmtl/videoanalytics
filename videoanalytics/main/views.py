@@ -65,7 +65,7 @@ class IndexView(LoggedInMixin, View):
 
     def get(self, *args, **kwargs):
         user = self.request.user
-        return HttpResponseRedirect(user.profile.last_location_url())
+        return HttpResponseRedirect(user.profile.next_unlocked_section_url())
 
 
 class TrackVideoView(LoggedInMixin, JSONResponseMixin, View):

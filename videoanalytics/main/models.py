@@ -56,6 +56,17 @@ class UserProfile(models.Model):
 
         return ''
 
+    def next_unlocked_section_url(self):
+        hierarchy = Hierarchy.get_hierarchy(self.research_group)
+        last_section = hierarchy.get_last_leaf(hierarchy.get_root())
+
+        (visited, next_section) = last_section.gate_check(self.user)
+
+        if visited:
+            return last_section.get_absolute_url()
+        else:
+            return next_section.get_absolute_url()
+
     def last_location_url(self):
         if self.percent_complete() == 0:
             hierarchy = Hierarchy.get_hierarchy(self.research_group)

@@ -54,6 +54,36 @@ class UserProfileTest(TestCase):
         self.assertEquals(self.user.profile.last_location().get_absolute_url(),
                           "/pages/a/one/introduction/")
 
+    def test_next_unlocked_section(self):
+        # users with no visits should be at the first leaf
+        sections = self.hierarchy_a.get_root().get_descendants()
+
+        self.assertEquals(self.user.profile.next_unlocked_section_url(),
+                          sections[0].get_absolute_url())
+
+        # the visit must be complete
+        visit = UserPageVisit.objects.create(user=self.user,
+                                             section=sections[0])
+        self.assertEquals(self.user.profile.next_unlocked_section_url(),
+                          sections[0].get_absolute_url())
+        visit.status = 'complete'
+        visit.save()
+
+        # once complete, the user is moved to the next section
+        self.assertEquals(self.user.profile.next_unlocked_section_url(),
+                          sections[1].get_absolute_url())
+
+        UserPageVisit.objects.create(
+            user=self.user, section=sections[1], status='complete')
+        UserPageVisit.objects.create(
+            user=self.user, section=sections[2], status='complete')
+        UserPageVisit.objects.create(
+            user=self.user, section=sections[3], status='complete')
+
+        # return the last page if all sections are visited
+        self.assertEquals(self.user.profile.next_unlocked_section_url(),
+                          sections[3].get_absolute_url())
+
     def test_percent_complete(self):
         self.assertEquals(self.user.profile.percent_complete(), 0)
 
