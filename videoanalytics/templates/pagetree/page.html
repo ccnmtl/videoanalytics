@@ -45,9 +45,15 @@
                 {% if needs_submit %}
                 {% if is_submitted %}
                     <br />
+                    {% if 'Post-Quiz' in section.label %}
+                        <div class="alert alert-success" role="alert">
+                            Thank you for your answers. We very much appreciate your participation in this study.
+                        </div>
+                    {% else %}
                     <div class="alert alert-success" role="alert">
                         The diagnostic is complete. Click Next below to see your recommendations.
                     </div>
+                    {% endif %}
                 {% else %}
                 <form name="page" action="." method="post">{% csrf_token %}
                 {% endif %}
