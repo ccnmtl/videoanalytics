@@ -1,6 +1,8 @@
+import django.contrib.auth.views
+import djangowind.views
 import debug_toolbar
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import password_change, password_change_done, \
@@ -16,29 +18,28 @@ admin.autodiscover()
 
 redirect_after_logout = getattr(settings, 'LOGOUT_REDIRECT_URL', None)
 
-auth_urls = (r'^accounts/', include('django.contrib.auth.urls'))
+auth_urls = url(r'^accounts/', include('django.contrib.auth.urls'))
 
-logout_page = (r'^accounts/logout/$',
-               'django.contrib.auth.views.logout',
-               {'next_page': redirect_after_logout})
-admin_logout_page = (r'^accounts/logout/$',
-                     'django.contrib.auth.views.logout',
-                     {'next_page': '/admin/'})
+logout_page = url(r'^accounts/logout/$',
+                  django.contrib.auth.views.logout,
+                  {'next_page': redirect_after_logout})
+admin_logout_page = url(r'^accounts/logout/$',
+                        django.contrib.auth.views.logout,
+                        {'next_page': '/admin/'})
 
 if hasattr(settings, 'CAS_BASE'):
-    auth_urls = (r'^accounts/', include('djangowind.urls'))
-    logout_page = (r'^accounts/logout/$',
-                   'djangowind.views.logout',
-                   {'next_page': redirect_after_logout})
-    admin_logout_page = (r'^admin/logout/$',
-                         'djangowind.views.logout',
-                         {'next_page': redirect_after_logout})
+    auth_urls = url(r'^accounts/', include('djangowind.urls'))
+    logout_page = url(r'^accounts/logout/$',
+                      djangowind.views.logout,
+                      {'next_page': redirect_after_logout})
+    admin_logout_page = url(r'^admin/logout/$',
+                            djangowind.views.logout,
+                            {'next_page': redirect_after_logout})
 
 
-urlpatterns = patterns(
-    '',
-    (r'^$', ensure_csrf_cookie(IndexView.as_view())),
-    (r'^admin/', include(admin.site.urls)),
+urlpatterns = [
+    url(r'^$', ensure_csrf_cookie(IndexView.as_view())),
+    url(r'^admin/', include(admin.site.urls)),
 
     # password change & reset. overriding to gate them.
     url(r'^accounts/password_change/$',
@@ -58,37 +59,36 @@ urlpatterns = patterns(
     auth_urls,
 
     url(r'^_impersonate/', include('impersonate.urls')),
-    (r'^stats/$', TemplateView.as_view(template_name="stats.html")),
-    (r'smoketest/', include('smoketest.urls')),
-    (r'^pagetree/', include('pagetree.urls')),
-    (r'^quizblock/', include('quizblock.urls')),
+    url(r'^stats/$', TemplateView.as_view(template_name="stats.html")),
+    url(r'smoketest/', include('smoketest.urls')),
+    url(r'^pagetree/', include('pagetree.urls')),
+    url(r'^quizblock/', include('quizblock.urls')),
 
-    (r'^report/$', ReportView.as_view(), {}, 'report-view'),
-    (r'^track/$', TrackVideoView.as_view()),
+    url(r'^report/$', ReportView.as_view(), {}, 'report-view'),
+    url(r'^track/$', TrackVideoView.as_view()),
 
     # Group One
-    (r'^pages/a/edit/(?P<path>.*)$', RestrictedEditView.as_view(
+    url(r'^pages/a/edit/(?P<path>.*)$', RestrictedEditView.as_view(
         hierarchy_name="a", hierarchy_base="/pages/a/")),
-    (r'^pages/a/(?P<path>.*)$', login_required(RestrictedPageView.as_view(
+    url(r'^pages/a/(?P<path>.*)$', login_required(RestrictedPageView.as_view(
         hierarchy_name="a", hierarchy_base="/pages/a/", gated=True)),
         {}, 'view-alpha-page'),
 
     # Group Two
-    (r'^pages/b/edit/(?P<path>.*)$', RestrictedEditView.as_view(
+    url(r'^pages/b/edit/(?P<path>.*)$', RestrictedEditView.as_view(
         hierarchy_name="b", hierarchy_base="/pages/b/")),
-    (r'^pages/b/(?P<path>.*)$', login_required(RestrictedPageView.as_view(
+    url(r'^pages/b/(?P<path>.*)$', login_required(RestrictedPageView.as_view(
         hierarchy_name="b", hierarchy_base="/pages/b/", gated=True)),
-     {}, 'view-beta-page'),
+        {}, 'view-beta-page'),
 
     # Videos
-    (r'^pages/videos/edit/(?P<path>.*)$', RestrictedEditView.as_view(
+    url(r'^pages/videos/edit/(?P<path>.*)$', RestrictedEditView.as_view(
         hierarchy_name="videos", hierarchy_base="/pages/videos/")),
-    (r'^pages/videos/(?P<path>.*)$', login_required(VideoPageView.as_view(
+    url(r'^pages/videos/(?P<path>.*)$', login_required(VideoPageView.as_view(
         hierarchy_name="videos", hierarchy_base="/pages/videos/", gated=True)),
-     {}, 'view-beta-page')
-)
+        {}, 'view-beta-page'),
+]
 
 
 if settings.DEBUG:
-    urlpatterns += patterns('',
-                            url(r'^__debug__/', include(debug_toolbar.urls)))
+    urlpatterns += [url(r'^__debug__/', include(debug_toolbar.urls))]
