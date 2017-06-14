@@ -13,6 +13,7 @@ class UserPageVisitAdmin(admin.ModelAdmin):
     search_fields = ("user__username",)
     list_display = ("user", "section", "status", "first_visit", "last_visit")
 
+
 admin.site.register(UserPageVisit, UserPageVisitAdmin)
 
 
@@ -23,6 +24,7 @@ class UserVideoViewAdmin(admin.ModelAdmin):
     search_fields = ("user__username",)
     list_display = ("user", "video_id", "video_duration", "seconds_viewed")
 
+
 admin.site.register(UserVideoView, UserVideoViewAdmin)
 
 
@@ -32,5 +34,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     search_fields = ("user__username",)
     list_display = ("user", "created")
+
 
 admin.site.register(UserProfile, UserProfileAdmin)
