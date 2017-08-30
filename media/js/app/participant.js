@@ -65,17 +65,17 @@
         },
         onPlayerStateChange: function(event) {
             switch (event.data) {
-            case YT.PlayerState.ENDED:
-            case YT.PlayerState.PAUSED:
-                clearInterval(this.timer);
-                delete this.timer;
-                this.recordSecondsViewed();
-                break;
-            case YT.PlayerState.PLAYING:
-                jQuery('a, .nav li').attr('disabled', 'disabled');
-                this._start = new Date().getTime();
-                this.timer = setInterval(this.recordSecondsViewed, 5000);
-                break;
+                case YT.PlayerState.ENDED:
+                case YT.PlayerState.PAUSED:
+                    clearInterval(this.timer);
+                    delete this.timer;
+                    this.recordSecondsViewed();
+                    break;
+                case YT.PlayerState.PLAYING:
+                    jQuery('a, .nav li').attr('disabled', 'disabled');
+                    this._start = new Date().getTime();
+                    this.timer = setInterval(this.recordSecondsViewed, 5000);
+                    break;
             }
         },
         isWatching: function() {
