@@ -1,4 +1,5 @@
-/* global Backbone: true, _: true, alert: true */
+/* global Backbone: true, _: true, alert: true, YT: true, onPlayerReady: true */
+/* global onPlayerStateChange: true */
 
 (function() {
     window.ParticipantPageView = Backbone.View.extend({
@@ -10,13 +11,12 @@
         },
         initialize: function(options) {
             _.bindAll(this,
-                      'onPlayerReady',
-                      'onPlayerStateChange', 'onYouTubeIframeAPIReady',
-                      'onClickDisabled', 'onClickBack',
-                      'isWatching', 'onSubmitPage', 'isFormComplete',
-                      'recordSecondsViewed');
+                'onPlayerReady',
+                'onPlayerStateChange', 'onYouTubeIframeAPIReady',
+                'onClickDisabled', 'onClickBack',
+                'isWatching', 'onSubmitPage', 'isFormComplete',
+                'recordSecondsViewed');
 
-            var self = this;
             this.participant_id = options.participant_id;
 
             // load the youtube iframe api
@@ -25,6 +25,8 @@
             window.onPlayerStateChange = this.onPlayerStateChange;
 
             var tag = document.createElement('script');
+
+            // eslint-disable-next-line scanjs-rules/assign_to_src
             tag.src = 'https://www.youtube.com/iframe_api';
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -65,17 +67,19 @@
         },
         onPlayerStateChange: function(event) {
             switch (event.data) {
-                case YT.PlayerState.ENDED:
-                case YT.PlayerState.PAUSED:
-                    clearInterval(this.timer);
-                    delete this.timer;
-                    this.recordSecondsViewed();
-                    break;
-                case YT.PlayerState.PLAYING:
-                    jQuery('a, .nav li').attr('disabled', 'disabled');
-                    this._start = new Date().getTime();
-                    this.timer = setInterval(this.recordSecondsViewed, 5000);
-                    break;
+            case YT.PlayerState.ENDED:
+            case YT.PlayerState.PAUSED:
+                clearInterval(this.timer);
+                delete this.timer;
+                this.recordSecondsViewed();
+                break;
+            case YT.PlayerState.PLAYING:
+                jQuery('a, .nav li').attr('disabled', 'disabled');
+                this._start = new Date().getTime();
+                // eslint-disable-next-line scanjs-rules/call_setInterval
+                this.timer = setInterval(this.recordSecondsViewed, 5000);
+                    
+                break;
             }
         },
         isWatching: function() {
