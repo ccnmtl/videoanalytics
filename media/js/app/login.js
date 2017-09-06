@@ -22,6 +22,7 @@
                         jQuery(self.el).find('div.local-login-errors').show();
                     } else {
                         // redirect to the required url
+                        // eslint-disable-next-line scanjs-rules/assign_to_location
                         window.location = response.next;
                     }
                 },
