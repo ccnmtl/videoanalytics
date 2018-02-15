@@ -23,7 +23,7 @@ lxml==4.1.1
 fuzzywuzzy==0.16.0
 sure==1.4.7
 ipython==5.5.0 # pyup: <6.0.0
-ipdb==0.10.3
+ipdb==0.11
 requirements/src/lettuce-0.2.19ccnmtl-py2-none-any.whl
 rdflib==4.2.2
 selenium==3.9.0
