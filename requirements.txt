@@ -26,7 +26,7 @@ ipython==5.5.0 # pyup: <6.0.0
 ipdb==0.11
 requirements/src/lettuce-0.2.19ccnmtl-py2-none-any.whl
 rdflib==4.2.2
-selenium==3.10.0
+selenium==3.11.0
 coverage==4.5.1
 pyasn1==0.4.2
 pyOpenSSL==17.5.0
