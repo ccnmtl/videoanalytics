@@ -16,11 +16,11 @@ class Command(BaseCommand):
         username = row[0]
         password = row[1]
         group = row[2]
-        print '{}/{} in {}'.format(username, password, group)
+        print('{}/{} in {}').format(username, password, group)
 
         try:
             user = User.objects.get(username=username)
-            print 'User {} already exists'.format(username)
+            print('User {} already exists').format(username)
         except User.DoesNotExist:
             user = User.objects.create_user(username, '', password)
 
@@ -31,14 +31,14 @@ class Command(BaseCommand):
         args = 'Usage: ./manage.py import_users --csv csv file'
 
         if not options.get('csv'):
-            print args
+            print(args)
             return
 
         try:
             fh = open(options.get('csv'), 'r')
 
         except IOError:
-            print 'error opening {}'.format(options.get('csv'))
+            print('error opening {}').format(options.get('csv'))
             return
 
         table = csv.reader(fh)

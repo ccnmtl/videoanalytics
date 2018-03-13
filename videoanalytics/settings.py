@@ -1,5 +1,5 @@
 # flake8: noqa
-from settings_shared import *
+from videoanalytics.settings_shared import *
 
 try:
     from videoanalytics.local_settings import *
