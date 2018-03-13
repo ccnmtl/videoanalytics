@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
@@ -5,11 +7,11 @@ from django.db import models
 from django.db.models.fields.related import OneToOneField
 from django.db.models.signals import post_save
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from pagetree.models import Hierarchy, UserPageVisit, PageBlock
 from pagetree.reports import PagetreeReport, ReportableInterface, \
     StandaloneReportColumn, ReportColumnInterface
 from quizblock.models import Submission
-
 from videoanalytics.main.templatetags.quizsummary import \
     get_quizzes_by_css_class, get_quiz_summary_by_category
 
@@ -148,6 +150,7 @@ class QuizSummaryReportColumn(ReportColumnInterface):
             return ''
 
 
+@python_2_unicode_compatible
 class QuizSummaryBlock(models.Model):
     pageblocks = GenericRelation(
         PageBlock, related_query_name='quiz_summary')
@@ -158,8 +161,8 @@ class QuizSummaryBlock(models.Model):
     def pageblock(self):
         return self.pageblocks.all()[0]
 
-    def __unicode__(self):
-        return unicode(self.pageblock())
+    def __str__(self):
+        return str(self.pageblock())
 
     @classmethod
     def add_form(self):
@@ -253,8 +256,8 @@ class YouTubeBlock(models.Model):
     def pageblock(self):
         return self.pageblocks.all()[0]
 
-    def __unicode__(self):
-        return unicode(self.pageblock())
+    def __str__(self):
+        return str(self.pageblock())
 
     @classmethod
     def add_form(self):

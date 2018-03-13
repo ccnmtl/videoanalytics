@@ -91,37 +91,37 @@ class VideoAnalyticsReportTest(TestCase):
         header = ['hierarchy', 'itemIdentifier', 'exercise type',
                   'itemType', 'itemText', 'answerIdentifier',
                   'answerText']
-        self.assertEquals(rows.next(), header)
+        self.assertEquals(next(rows), header)
 
-        self.assertEquals(rows.next(), "")
+        self.assertEquals(next(rows), "")
 
         # participant id
-        self.assertEquals(rows.next(), ['', 'participant_id', 'profile',
-                                        'string', 'Participant Id'])
+        self.assertEquals(next(rows), ['', 'participant_id', 'profile',
+                                       'string', 'Participant Id'])
 
-        self.assertEquals(rows.next(), ['', 'research_group', 'profile',
-                                        'string', 'Research Group'])
+        self.assertEquals(next(rows), ['', 'research_group', 'profile',
+                                       'string', 'Research Group'])
 
         # percent complete
-        self.assertEquals(rows.next(), ['', 'percent_complete',
-                                        'profile',
-                                        'percent', '% of hierarchy completed'])
+        self.assertEquals(next(rows), ['', 'percent_complete',
+                                       'profile',
+                                       'percent', '% of hierarchy completed'])
 
         # first access
-        self.assertEquals(rows.next(), ['', 'first_access',
-                                        'profile', 'date string',
-                                        'first access date'])
+        self.assertEquals(next(rows), ['', 'first_access',
+                                       'profile', 'date string',
+                                       'first access date'])
         # last access
-        self.assertEquals(rows.next(), ['', 'last_access',
-                                        'profile', 'date string',
-                                        'last access date'])
+        self.assertEquals(next(rows), ['', 'last_access',
+                                       'profile', 'date string',
+                                       'last access date'])
 
         youtube_metadata = [u'a', u'avideo', 'YouTube Video',
                             'percent viewed', u'Title']
-        self.assertEquals(rows.next(), youtube_metadata)
+        self.assertEquals(next(rows), youtube_metadata)
 
         try:
-            rows.next()
+            next(rows)
         except StopIteration:
             pass  # expected
 
@@ -130,9 +130,9 @@ class VideoAnalyticsReportTest(TestCase):
         header = ['participant_id', 'research_group',
                   'percent_complete', 'first_access', 'last_access',
                   'avideo']
-        self.assertEquals(rows.next(), header)
+        self.assertEquals(next(rows), header)
 
-        row = rows.next()
+        row = next(rows)
         self.assertEquals(row[0], self.participant.username)
         self.assertEquals(row[1], 'a')
         self.assertEquals(row[2], 50)
@@ -140,7 +140,7 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertIsNotNone(row[4])
         self.assertEquals(row[5], '25.0')
 
-        row = rows.next()
+        row = next(rows)
         self.assertEquals(row[0], self.participant2.username)
         self.assertEquals(row[1], 'a')
         self.assertEquals(row[2], 0)
@@ -149,6 +149,6 @@ class VideoAnalyticsReportTest(TestCase):
         self.assertEquals(row[5], 0)
 
         try:
-            rows.next()
+            next(rows)
         except StopIteration:
             pass  # expected

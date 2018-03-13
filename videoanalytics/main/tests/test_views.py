@@ -16,7 +16,7 @@ class BasicTest(TestCase):
     def test_smoketest(self):
         response = self.client.get("/smoketest/")
         self.assertEquals(response.status_code, 200)
-        assert "PASS" in response.content
+        self.assertTrue(b"PASS" in response.content)
 
 
 class PagetreeViewTestsLoggedOut(TestCase):
@@ -106,8 +106,8 @@ class IndexViewTest(TestCase):
 
     def test_anonymous_user(self):
         response = self.client.get('/', follow=True)
-        self.assertTrue('Get Started' in response.content)
-        self.assertFalse('Log Out' in response.content)
+        self.assertTrue(b'Get Started' in response.content)
+        self.assertFalse(b'Log Out' in response.content)
         self.assertEquals(response.status_code, 200)
 
     def test_user(self):
