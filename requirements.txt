@@ -51,7 +51,7 @@ rcssmin==1.0.6
 rjsmin==1.0.12
 Jinja2==2.10
 MarkupSafe==1.0
-pytz==2018.3
+pytz==2018.4
 
 django-bootstrap3==9.1.0
 djangowind==1.1.0
