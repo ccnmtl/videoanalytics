@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "media/js/holder/package.json",
+        "package.json"
+      ]
+    }
+  }
+}
